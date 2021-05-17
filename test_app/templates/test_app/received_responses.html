@@ -1,0 +1,54 @@
+{% extends "test_app/base.html" %}
+{% block content %}
+    {% if page_obj.paginator.count == 0 %}
+    <h1 class="mb-3">No Responses Yet!</h1> <!-- get a username passed into the URL -->
+        <p>All the responses for your uploaded solutions will be shown here!</p>
+        <p>Maybe the checking process is taking too long... <a href="{% url 'home' %}">Back to the home screen.</a></p>
+    {% else %}
+    <h1 class="mb-3">Available responses ({{ page_obj.paginator.count }})</h1> <!-- get a username passed into the URL -->
+    {% endif %}
+    {% for response in responses %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <small class="text-muted">{{ response.date_created|date:"F d, Y" }}</small>
+                    <a class="btn btn-outline-danger btn-sm mt-2 mb-2" href="{% url 'response-delete' response.id %}">Delete</a>
+                </div>
+                <h2><a class="article-title">Response from {{ response.author }}</a></h2>
+                <p class="article-content">Associated Vacancy: <a class="ml-0" href="{% url 'vacancy-detail' response.associated_solution.associated_vacancy.id %}">{{ response.associated_solution.associated_vacancy.title }}</a>
+
+                {{ response.content }}</p>
+                <a href="{{ response.associated_solution.file.url }}" target="_blank">
+                    <button class="btn btn-outline-info" type="button">Open Attached Task</button>
+                </a>
+                <p></p>
+                <div class="border-top pt-2">
+                        <small class="text-muted">
+                            Your attached solution (click to download): <a class="ml-1" href="{{ response.associated_solution.file.url }}" download="">{{ response.associated_solution.filename }}</a>
+                        </small>
+                </div>
+            </div>
+        </article>
+    {% endfor %}
+    {% if is_paginated %}
+        {% if page_obj.has_previous %}
+            <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
+            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
+            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+        {% endif %}
+
+    {% endif %}
+{% endblock content %}
